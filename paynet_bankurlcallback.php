@@ -1,5 +1,6 @@
 <?php //error_reporting(E_ALL); 
 include("connection.php"); 
+include("functions.php"); 
 
     // Post JSON Data Convert in Request Format
     $jsonData = file_get_contents("php://input");//Get all post data
@@ -7,9 +8,9 @@ include("connection.php");
     $_POST= $post_data;
 
     $endpointid='620';
-    
-    //
-    $client_orderid=rand();
+    $orderno=generateRandomOrder();
+
+    $client_orderid=$orderno;
     
     $order_desc='ABC';
     $first_name=mysql_real_escape_string(trim($_POST['first_name']));
@@ -149,22 +150,22 @@ include("connection.php");
         print_r(json_encode($data)); die;
     }
     
-   /* $query="INSERT INTO fx_transaction(transferto, amount, ccode, tsdate, transferby, type, status) VALUES('".$transferto."','".$amount."','".$currency_code."','".date('Y-m-d H:i:s')."','".$transferby."','Instant','".$status."')";
-    //$result =mysql_query($query);
+    $query="INSERT INTO fx_transaction(transferto,orderno, amount, ccode, tsdate, transferby, type, status) VALUES('".$transferto."','".$orderno."','".$amount."','".$currency_code."','".date('Y-m-d H:i:s')."','".$transferby."','Instant','".$status."')";
+    $result =mysql_query($query);
     if ($result)  
         {
-            $data['status']="Success";
-            $data['msg']="Data Insert Successfully";
+            // another way to call error_log():
+            error_log("order no ".$orderno." processed at ".date('Y-m-d H:i:s'), 3, "errors.log");
+            //$data['msg']="Data Insert Successfully";
         }
         else 
         {
-            $data['status']="Error";
-            $data['msg']="Data Insert UnSuccessful";
+            error_log("order no ".$orderno." not inserted in database at ".date('Y-m-d H:i:s'), 3, "errors.log");
         }
  
     // print_r($data); die; 
-    print_r(json_encode($data));
-    die;*/
+   // print_r(json_encode($data));
+   
 
 
 $amount=str_replace('.','', $amount);
@@ -221,12 +222,7 @@ $curldata=array(
     {
 	    if($new['redirect-url']!='')
 	    {
-			$data['status']="Success";
-            $data['msg']="Data Insert UnSuccessful";
-            $data['redirect-url']=$new['redirect-url'];
-			/*echo "Order Id:- ".$new['merchant-order-id'];
-    		echo "Paynet Order Id:- ".$new['paynet-order-id'];
-    		echo "Redirect URL:- ".$new['redirect-url'];*/
+                $data['redirect-url']=$new['redirect-url'];
 	    }
 	}
 
